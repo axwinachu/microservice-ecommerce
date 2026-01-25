@@ -2,13 +2,8 @@ package com.example.product_service.controller;
 
 import com.example.product_service.dto.ProductResponseDto;
 import com.example.product_service.facade.ProductPublicFacade;
-import com.example.product_service.service.ProductPublicService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,12 +20,12 @@ public class ProductPublicController {
     public ProductResponseDto getProductById(@PathVariable Long id){
         return productPublicFacade.getProductById(id);
     }
-    @GetMapping("/product/{category}")
+    @GetMapping("/product/category/{category}")
     public List<ProductResponseDto> getProductByCategory(@PathVariable String category){
         return productPublicFacade.getProductByCategory(category);
     }
-    @GetMapping("/product/{search}")
-    public List<ProductResponseDto> getProductBySearch(@PathVariable String search){
+    @GetMapping("/product/search")
+    public List<ProductResponseDto> getProductBySearch(@RequestParam String search){
         return productPublicFacade.getProductBySearch(search);
     }
 }

@@ -19,19 +19,16 @@ import java.util.List;
 public class ProductRequestDto {
     private Long productId;
     private String productName;
-    @Column(length = 500)
     private String shortDescription;
-    @Column(length=5000)
     private String description;
     private String brand;
+    private String category;
     private BigDecimal price;
-    private BigDecimal discountPrize;
+    private BigDecimal discountPrice;
     private Double taxPercentage;
     private Integer stockQuantity;
-    @Enumerated(EnumType.STRING)
     private Availability availability;
     private String mainImageUrl;
-    @ElementCollection
     private List<String> imageUrl;
     private Double averageRating;
     private Integer reviewCount;

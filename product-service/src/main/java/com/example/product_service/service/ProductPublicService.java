@@ -18,7 +18,7 @@ public class ProductPublicService {
     }
 
     public Product getProductById(Long id) {
-        return productRepository.findById(id).orElseThrow(()->new ProductIdNotFound("id"+id));
+        return productRepository.findById(id).orElseThrow(()->new ProductIdNotFound("id: "+id));
     }
 
     public List<Product> getProductByCategory(String category) {

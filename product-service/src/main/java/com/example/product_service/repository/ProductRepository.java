@@ -7,8 +7,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product,Long> {
+public interface ProductRepository extends JpaRepository<Product, Long> {
+
     List<Product> findByCategory(String category);
+
     List<Product> findByProductNameContainingIgnoreCase(String search);
-    boolean existedByProductNameAndBrand(String productName,String brand);
+
+    boolean existsByProductNameAndBrand(String productName, String brand);
 }

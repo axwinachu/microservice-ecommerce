@@ -25,7 +25,7 @@ public class ProductAdminService {
     }
 
     public boolean productFindByNameAndBrand(String productName, String brand) {
-         return productRepository.existedByProductNameAndBrand(productName,brand);
+         return productRepository.existsByProductNameAndBrand(productName,brand);
     }
 
     public Product addProduct(Product product) {

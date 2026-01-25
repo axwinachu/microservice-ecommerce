@@ -1,6 +1,7 @@
 package com.example.product_service.facade;
 
 import com.example.product_service.dto.ProductRequestDto;
+import com.example.product_service.dto.ProductResponseDto;
 import com.example.product_service.exception.AlreadyHaveAProduct;
 import com.example.product_service.mapper.Mapper;
 import com.example.product_service.model.Product;
@@ -40,8 +41,8 @@ public class ProductAdminFacade {
     }
 
     public ProductRequestDto deleteById(Long id) {
-        Product product=productAdminService.getProductById(id);
+        ProductRequestDto product=mapper.productToProductRequestDto(productAdminService.getProductById(id));
         productAdminService.deleteProductById(id);
-        return mapper.productToProductRequestDto(product);
+        return product ;
     }
 }
