@@ -1,5 +1,6 @@
 package com.example.product_service.dto;
 
+import com.example.product_service.model.Product;
 import com.example.product_service.model.enums.Availability;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -34,6 +35,6 @@ public class ProductRequestDto {
     private List<String> imageUrl;
     private Double averageRating;
     private Integer reviewCount;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+
+
 }

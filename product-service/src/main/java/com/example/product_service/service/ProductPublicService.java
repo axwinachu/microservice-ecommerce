@@ -26,6 +26,6 @@ public class ProductPublicService {
     }
 
     public List<Product> getProductBySearch(String search) {
-        return productRepository.findByNameContainingIgnoreCase(search);
+        return productRepository.findByProductNameContainingIgnoreCase(search);
     }
 }
