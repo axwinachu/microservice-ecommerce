@@ -16,15 +16,15 @@ public class ProductPublicController {
     public List<ProductResponseDto> getALlProducts(){
         return productPublicFacade.getAllProducts();
     }
-    @GetMapping("/product/{id}")
+    @GetMapping("/products/{id}")
     public ProductResponseDto getProductById(@PathVariable Long id){
         return productPublicFacade.getProductById(id);
     }
-    @GetMapping("/product/category/{category}")
+    @GetMapping("/products/category/{category}")
     public List<ProductResponseDto> getProductByCategory(@PathVariable String category){
         return productPublicFacade.getProductByCategory(category);
     }
-    @GetMapping("/product/search")
+    @GetMapping("/products/search")
     public List<ProductResponseDto> getProductBySearch(@RequestParam String search){
         return productPublicFacade.getProductBySearch(search);
     }
