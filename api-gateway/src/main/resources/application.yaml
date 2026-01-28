@@ -1,0 +1,50 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/**
+          filters:
+            - StripPrefix=1
+
+        - id: product-service
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/products/**
+          filters:
+            - RewritePath=/products(?<segment>/?.*), /api/products${segment}
+
+        - id: product-admin-service
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/admin/products/**
+          filters:
+            - RewritePath=/admin/products(?<segment>/?.*), /api/admin/products${segment}
+
+        - id: cart-service
+          uri: lb://CART-SERVICE
+          predicates:
+            - Path=/cart/**
+          filters:
+            - StripPrefix=1
+
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/orders/**
+          filters:
+            - StripPrefix=1
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka

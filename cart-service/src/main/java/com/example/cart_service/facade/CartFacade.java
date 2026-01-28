@@ -1,8 +1,8 @@
 package com.example.cart_service.facade;
 
 import com.example.cart_service.client.ProductClient;
-import com.example.cart_service.dto.AddToCartRequestDto;
-import com.example.cart_service.dto.ProductDto;
+import com.example.cart_service.dto.*;
+import com.example.cart_service.mapper.Mapper;
 import com.example.cart_service.model.Cart;
 import com.example.cart_service.model.CartItems;
 import com.example.cart_service.service.CartService;
@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class CartFacade {
 
     private final CartService cartService;
     private final ProductClient productClient;
+    private final Mapper mapper;
 
     public void addProductToCart(Long userId, AddToCartRequestDto dto) {
 
@@ -70,6 +74,52 @@ public class CartFacade {
         cart.setTotalPrice(cartTotal);
 
         // 8️⃣ Persist cart (cascade saves items)
+        cartService.save(cart);
+    }
+    public CartResponseDto viewCart(Long userId) {
+        Cart cart=cartService.findByUserId(userId).orElseGet(()->cartService.createCart(userId));
+        List<CartItemsResponseDto> cartResponseDto=cart.getItems()
+                .stream().map(mapper::cartItemTOCartItemsResponseDto).toList();
+        return CartResponseDto.builder()
+                .id(cart.getId())
+                .userId(cart.getUserId())
+                .items(cartResponseDto)
+                .totalPrice(cart.getTotalPrice()).build();
+    }
+    public void updateCartItems(Long userId, Long productId, UpdateCartItemRequestDto updateCartItemRequestDto) {
+        Cart cart=cartService.findByUserId(userId)
+                .orElseThrow(()->new RuntimeException("Cart Not Found"));
+        CartItems cartItems=cart.getItems().stream().filter(i->i.getProductId().equals(productId))
+                .findFirst()
+                .orElseThrow(()->new RuntimeException("Product Id not found in the cart"));
+        if(updateCartItemRequestDto.getQuantity()<=0){
+            throw new RuntimeException("quantity not be negative");
+        }
+        cartItems.setQuantity(updateCartItemRequestDto.getQuantity());
+        BigDecimal unitPrice =
+                cartItems.getPrice().divide(
+                        BigDecimal.valueOf(cartItems.getQuantity()),
+                        RoundingMode.HALF_UP
+                );
+        cartItems.setPrice(unitPrice.multiply(BigDecimal.valueOf(updateCartItemRequestDto.getQuantity())));
+
+        BigDecimal cartTotal = cart.getItems().stream()
+                .map(CartItems::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        cart.setTotalPrice(cartTotal);
+        cartService.save(cart);
+    }
+    public void removeFromCart(Long userId, Long productId) {
+        Cart cart=cartService.findByUserId(userId)
+                .orElseThrow(()->new RuntimeException("cart not found exception"));
+        CartItems product=cart.getItems().stream().filter(i->i.getProductId().equals(productId))
+                .findFirst().orElseThrow(()->new RuntimeException("product id not found"));
+        cart.getItems().remove(product);
+        BigDecimal cartTotal = cart.getItems().stream()
+                .map(CartItems::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        cart.setTotalPrice(cartTotal);
         cartService.save(cart);
     }
 }

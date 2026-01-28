@@ -1,0 +1,48 @@
+package com.example.order_service.facade;
+
+import com.example.order_service.client.CartClient;
+import com.example.order_service.dto.CartItemsResponseDto;
+import com.example.order_service.dto.CartResponseDto;
+import com.example.order_service.exception.CartIsEmpty;
+import com.example.order_service.model.Enum.OrderStatus;
+import com.example.order_service.model.Order;
+import com.example.order_service.model.OrderItem;
+import com.example.order_service.repository.OrderRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+
+@Component
+@RequiredArgsConstructor
+public class OrderFacade {
+    private final OrderRepository orderRepository;
+    private final CartClient cartClient;
+    public Long placeOrder(Long userId) {
+        CartResponseDto cartResponseDto=cartClient.getCart(userId);
+        if(cartResponseDto.getItems().isEmpty()){
+            throw new CartIsEmpty("cart is empty");
+        }
+        Order order=Order
+                .builder().userId(cartResponseDto.getUserId())
+                .totalAmount(cartResponseDto.getTotalPrice())
+                .status(OrderStatus.CREATED)
+                .createdAt(LocalDateTime.now()).build();
+        for (CartItemsResponseDto cartItem:cartResponseDto.getItems()){
+            OrderItem orderItem = OrderItem.builder()
+                    .productId(cartItem.getProductId())
+                    .productName(cartItem.getProductName())
+                    .productImage(cartItem.getProductImage())
+                    .quantity(cartItem.getQuantity())
+                    .price(cartItem.getPrice())
+                    .order(order)
+                    .build();
+            order.getItems().add(orderItem);
+
+        }
+        Order savedOrder = orderRepository.save(order);
+        cartClient.clearCart(userId);
+
+        return savedOrder.getId();
+    }
+}
