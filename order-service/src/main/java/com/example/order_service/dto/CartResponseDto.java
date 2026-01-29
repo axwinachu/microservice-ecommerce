@@ -16,6 +16,7 @@ import java.util.List;
 public class CartResponseDto {
     private Long id;
     private Long userId;
+    @Builder.Default
     private List<CartItemsResponseDto> items=new ArrayList<>();
     private BigDecimal totalPrice;
 }

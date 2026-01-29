@@ -9,5 +9,13 @@ public class GlobalExceptionHandler {
     public Response handleCartEmpty(Exception ex){
         return new Response("404","cart is empty");
     }
+    @ExceptionHandler(CartNotFoundException.class)
+    public Response handleCartNotFound(Exception ex){
+        return new Response("404",ex.getMessage());
+    }
+    @ExceptionHandler(Exception.class)
+    public Response otherException(Exception ex){
+        return new Response("500",ex.getMessage());
+    }
 
 }

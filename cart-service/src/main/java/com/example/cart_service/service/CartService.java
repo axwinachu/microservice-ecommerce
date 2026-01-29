@@ -1,6 +1,7 @@
 package com.example.cart_service.service;
 
 import com.example.cart_service.model.Cart;
+import com.example.cart_service.repository.CartItemsRepository;
 import com.example.cart_service.repository.CartRepository;
 import jakarta.websocket.server.ServerEndpoint;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CartService {
     private final CartRepository cartRepository;
+    private final CartItemsRepository cartItemsRepository;
     public Optional<Cart> findByUserId(Long userId){
         return cartRepository.findByUserId(userId);
     }
@@ -27,4 +29,10 @@ public class CartService {
     public Cart save(Cart cart){
         return cartRepository.save(cart);
     }
+
+    public void deleteByCartId(Long id) {
+        cartItemsRepository.deleteByCartId(id);
+        cartRepository.deleteById(id);
+    }
+
 }

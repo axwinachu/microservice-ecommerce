@@ -35,7 +35,8 @@ spring:
           predicates:
             - Path=/cart/**
           filters:
-            - StripPrefix=1
+            - RewritePath=/cart(?<segment>/?.*), /api/cart${segment}
+
 
         - id: order-service
           uri: lb://ORDER-SERVICE
@@ -48,3 +49,5 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
+secret:
+  key: mySecretKeyForJWTTokenGenerationAndValidation12345

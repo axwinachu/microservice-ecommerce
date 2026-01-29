@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 @FeignClient(name = "cart-service")
 public interface CartClient {
-    @GetMapping("api/cart")
-    public CartResponseDto getCart(@RequestHeader("X_USER_ID") Long userId);
+    @GetMapping("/api/cart")
+    public CartResponseDto getCart(@RequestHeader("X-USER-ID") Long userId);
 
     @DeleteMapping("/api/cart")
     void clearCart(@RequestHeader("X-USER-ID") Long userId);

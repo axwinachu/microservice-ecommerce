@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/cart")
+@RequestMapping("/api/cart")
 @RequiredArgsConstructor
 public class CartController {
     private final CartFacade cartFacade;
@@ -33,4 +33,9 @@ public class CartController {
     public void removeItemFromCart(@RequestHeader("X-USER-ID") Long userId,@PathVariable Long productId ){
         cartFacade.removeFromCart(userId,productId);
     }
+    @DeleteMapping
+    public void clearCart(@RequestHeader("X-USER-ID") Long userId) {
+        cartFacade.clearCart(userId);
+    }
+
 }

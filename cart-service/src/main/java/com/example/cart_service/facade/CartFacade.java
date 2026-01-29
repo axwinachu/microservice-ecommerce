@@ -2,6 +2,9 @@ package com.example.cart_service.facade;
 
 import com.example.cart_service.client.ProductClient;
 import com.example.cart_service.dto.*;
+import com.example.cart_service.exception.CartNotFoundException;
+import com.example.cart_service.exception.OutofStockException;
+import com.example.cart_service.exception.ProducIdNotFoundException;
 import com.example.cart_service.mapper.Mapper;
 import com.example.cart_service.model.Cart;
 import com.example.cart_service.model.CartItems;
@@ -26,25 +29,17 @@ public class CartFacade {
 
     public void addProductToCart(Long userId, AddToCartRequestDto dto) {
 
-        // 1️⃣ Get or create cart
+
         Cart cart = cartService.findByUserId(userId)
                 .orElseGet(() -> cartService.createCart(userId));
-
-        // 2️⃣ Fetch product from Product Service
         ProductDto product = productClient.getProduct(dto.getProductId());
-
-        // 3️⃣ Validate stock
         if (product.getStockQuantity() < dto.getQuantity()) {
-            throw new RuntimeException("Insufficient stock for product: " + product.getProductId());
+            throw new OutofStockException("Insufficient stock for product: " + product.getProductId());
         }
-
-        // 4️⃣ Check if item already exists in cart
         CartItems item = cart.getItems().stream()
                 .filter(i -> i.getProductId().equals(product.getProductId()))
                 .findFirst()
                 .orElse(null);
-
-        // 5️⃣ Add new item or update existing one
         if (item == null) {
             item = CartItems.builder()
                     .productId(product.getProductId())
@@ -53,7 +48,7 @@ public class CartFacade {
                     .rating(product.getAverageRating())
                     .ratingCount(product.getReviewCount())
                     .quantity(dto.getQuantity())
-                    .price(product.getPrice()) // temporary, recalculated below
+                    .price(product.getPrice())
                     .cart(cart)
                     .build();
             cart.getItems().add(item);
@@ -61,19 +56,13 @@ public class CartFacade {
             item.setQuantity(item.getQuantity() + dto.getQuantity());
         }
 
-        // 6️⃣ Recalculate item total price (unitPrice × quantity)
         BigDecimal itemTotalPrice =
                 product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
-        item.setPrice(itemTotalPrice);
-
-        // 7️⃣ Recalculate cart total price
         BigDecimal cartTotal = cart.getItems().stream()
                 .map(CartItems::getPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         cart.setTotalPrice(cartTotal);
-
-        // 8️⃣ Persist cart (cascade saves items)
         cartService.save(cart);
     }
     public CartResponseDto viewCart(Long userId) {
@@ -88,12 +77,12 @@ public class CartFacade {
     }
     public void updateCartItems(Long userId, Long productId, UpdateCartItemRequestDto updateCartItemRequestDto) {
         Cart cart=cartService.findByUserId(userId)
-                .orElseThrow(()->new RuntimeException("Cart Not Found"));
+                .orElseThrow(()->new CartNotFoundException("Cart Not Found"));
         CartItems cartItems=cart.getItems().stream().filter(i->i.getProductId().equals(productId))
                 .findFirst()
-                .orElseThrow(()->new RuntimeException("Product Id not found in the cart"));
+                .orElseThrow(()->new ProducIdNotFoundException("Product Id not found in the cart"));
         if(updateCartItemRequestDto.getQuantity()<=0){
-            throw new RuntimeException("quantity not be negative");
+            throw new IllegalArgumentException("quantity not be negative");
         }
         cartItems.setQuantity(updateCartItemRequestDto.getQuantity());
         BigDecimal unitPrice =
@@ -112,9 +101,9 @@ public class CartFacade {
     }
     public void removeFromCart(Long userId, Long productId) {
         Cart cart=cartService.findByUserId(userId)
-                .orElseThrow(()->new RuntimeException("cart not found exception"));
+                .orElseThrow(()->new CartNotFoundException("cart not found exception"));
         CartItems product=cart.getItems().stream().filter(i->i.getProductId().equals(productId))
-                .findFirst().orElseThrow(()->new RuntimeException("product id not found"));
+                .findFirst().orElseThrow(()->new ProducIdNotFoundException("product id not found"));
         cart.getItems().remove(product);
         BigDecimal cartTotal = cart.getItems().stream()
                 .map(CartItems::getPrice)
@@ -122,4 +111,14 @@ public class CartFacade {
         cart.setTotalPrice(cartTotal);
         cartService.save(cart);
     }
+
+    @Transactional
+    public void clearCart(Long userId) {
+        Cart cart = cartService.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        cartService.deleteByCartId(cart.getId());
+        cart.setTotalPrice(BigDecimal.ZERO);
+    }
+
 }

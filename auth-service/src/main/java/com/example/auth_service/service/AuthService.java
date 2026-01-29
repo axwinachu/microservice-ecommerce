@@ -26,7 +26,7 @@ public class AuthService {
                 .email(request.getEmail())
                 .phoneNumber(request.getPhoneNumber())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.ADMIN)
+                .role(Role.USER)
                 .status(Status.ACTIVE)
                 .build();
 
