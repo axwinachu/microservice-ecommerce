@@ -24,12 +24,10 @@ public class AuthFilter implements GlobalFilter, Ordered {
         String path = exchange.getRequest().getURI().getPath();
         String method = exchange.getRequest().getMethod().name();
 
-        // Allow OPTIONS
         if ("OPTIONS".equalsIgnoreCase(method)) {
             return chain.filter(exchange);
         }
 
-        // Public endpoints (before & after StripPrefix)
         if (path.equals("/auth/signup") || path.equals("/signup") ||
                 path.equals("/auth/login")  || path.equals("/login")) {
             return chain.filter(exchange);
