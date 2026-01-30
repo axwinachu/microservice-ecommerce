@@ -1,6 +1,7 @@
 package com.example.cart_service.facade;
 
 import com.example.cart_service.client.ProductClient;
+import com.example.cart_service.client.ProductServiceClient;
 import com.example.cart_service.dto.*;
 import com.example.cart_service.exception.CartNotFoundException;
 import com.example.cart_service.exception.OutofStockException;
@@ -24,7 +25,7 @@ import java.util.List;
 public class CartFacade {
 
     private final CartService cartService;
-    private final ProductClient productClient;
+    private final ProductServiceClient productServiceClient;
     private final Mapper mapper;
 
     public void addProductToCart(Long userId, AddToCartRequestDto dto) {
@@ -32,7 +33,7 @@ public class CartFacade {
 
         Cart cart = cartService.findByUserId(userId)
                 .orElseGet(() -> cartService.createCart(userId));
-        ProductDto product = productClient.getProduct(dto.getProductId());
+        ProductDto product = productServiceClient.getProduct(dto.getProductId()).join();
         if (product.getStockQuantity() < dto.getQuantity()) {
             throw new OutofStockException("Insufficient stock for product: " + product.getProductId());
         }
@@ -65,6 +66,8 @@ public class CartFacade {
         cart.setTotalPrice(cartTotal);
         cartService.save(cart);
     }
+
+
     public CartResponseDto viewCart(Long userId) {
         Cart cart=cartService.findByUserId(userId).orElseGet(()->cartService.createCart(userId));
         List<CartItemsResponseDto> cartResponseDto=cart.getItems()

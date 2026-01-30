@@ -31,3 +31,26 @@ logging:
   level:
     org.springframework.cloud.netflix.eureka: INFO
     org.hibernate.SQL: DEBUG
+resilience4j:
+  circuitbreaker:
+    instances:
+      productService:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+
+  retry:
+    instances:
+      productService:
+        maxAttempts: 3
+        waitDuration: 500ms
+
+  timelimiter:
+    instances:
+      productService:
+        timeoutDuration: 2s
+        cancelRunningFuture: true
